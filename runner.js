@@ -12,16 +12,28 @@ let terminal = {
     
     cls: function() {
         this.textbuffer = Array.from({ length: ROWS }, () => Array.from({ length: COLS }, () => 0))
+    },
+    print: function(code) {
+        this.textbuffer[this.cursor[0]-1][this.cursor[1]-1] = code
+    },
+    cursorRight: function(code) {
+        this.cursor[1] += 1
+        if (this.cursor[1] > COLS) {
+            this.cursor[1] = 0
+            this.cursor[0] += 1
+        }
     }
 }
 
 function appendtext(e) {
-    textbuffer += e.key
     console.log(e)
-    //document.getElementById('console').innerText = textbuffer
+    terminal.print(e.key.charCodeAt(0))
+    terminal.cursorRight()
+    repaint()
 }
 
 function pageinit() {
+    terminal.cls()
     repaint()
 }
 
@@ -30,10 +42,14 @@ function repaint() {
     for (let y = 0; y < ROWS; y++) {
         if (y > 0) out += `<br />`
         for (let x = 0; x < COLS; x++) {
+            if (terminal.showcursor && x == terminal.cursor[1] - 1 && y == terminal.cursor[0] - 1)
+                out += `<charcursor></charcursor>`
+            
             let bgpos = codeToBgPos(terminal.textbuffer[y][x])
             out += `<charcell style="background-position: ${bgpos.x}px ${bgpos.y}px"></charcell>`
         }
     }
+    
     document.getElementById('console').innerHTML = out;
 }
 
