@@ -1,0 +1,38 @@
+<meta charset = "UTF-8" />
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="robots" content="noindex" />
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <title>Terran BASIC</title>
+    <script src="runner.js"></script>
+</head>
+<body onload="pageinit();">
+    <header>
+        <h2>Terran BASIC web runner</h2>
+    </header>
+    <controlpanel>
+        <div>
+            <button id="button_stop">Stop</button>
+            <button id="button_reset">Reset</button>
+            <button id="button_loadfile">Load&hellip;</button>
+            <button id="button_savefile">Save&hellip;</button>
+        </div>
+    </controlpanel>
+    <console>
+        <div id="console">
+            
+        </div>
+    </console>
+    <hr />
+    <message>
+        <p>Confused? Take a look at the <a href="https://raw.githubusercontent.com/curioustorvald/TerranBASIC/master/tbasman.pdf" target="_blank" rel="noopener noreferrer">mighty fine manual!</a></p>
+    </message>
+    <github>
+    
+    </github>
+    <script>
+        document.addEventListener('keydown', appendtext)
+    </script>
+</body>
+</html>

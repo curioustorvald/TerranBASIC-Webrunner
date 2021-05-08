@@ -1,0 +1,267 @@
+html {
+ background-color: #F0EDE5;
+}
+body {
+ font-family:Open Sans,Arial;
+ color:#454545;
+ font-size:16px;
+ margin:2em auto;
+ max-width:852px;
+ padding:1em;
+ line-height:1.4;
+ text-align:justify;
+ z-index: 10;
+}
+html.contrast body {
+ color:#050505
+}
+html.contrast blockquote {
+ color:#11151a
+}
+html.contrast blockquote:before {
+ color:#262626
+}
+html.contrast a {
+ color:#0051c9
+}
+html.contrast a:visited {
+ color:#7d013e
+}
+html.contrast span.wr {
+ color:#800
+}
+html.contrast span.mfw {
+ color:#4d0000
+}
+html.inverted {
+ background-color:#010101
+}
+html.inverted body {
+ color:#bababa
+}
+html.inverted div#contrast,
+html.inverted div#invmode {
+ color:#fff;
+ background-color:#000
+}
+html.inverted blockquote {
+ color:#dad0c7
+}
+html.inverted blockquote:before {
+ color:#bfbfbf
+}
+html.inverted a {
+ color:#07a
+}
+html.inverted a:visited {
+ color:#ac5a82
+}
+html.inverted span.wr {
+ color:#c0392b
+}
+html.inverted span.mfw {
+ color:#8a0000
+}
+html.inverted.contrast {
+ background-color:#010101
+}
+html.inverted.contrast body {
+ color:#fff
+}
+html.inverted.contrast div#contrast,
+html.inverted.contrast div#invmode {
+ color:#fff;
+ background-color:#000
+}
+html.inverted.contrast blockquote {
+ color:#f8f6f5
+}
+html.inverted.contrast blockquote:before {
+ color:#e5e5e5
+}
+html.inverted.contrast a {
+ color:#07a
+}
+html.inverted.contrast a:visited {
+ color:#ac5a82
+}
+html.inverted.contrast span.wr {
+ color:#c0392b
+}
+html.inverted.contrast span.mfw {
+ color:#a10000
+}
+a {
+ color:#07a
+}
+a:visited {
+ color:#941352
+}
+.noselect {
+ -webkit-touch-callout:none;
+ -webkit-user-select:none;
+ -moz-user-select:none;
+ -ms-user-select:none;
+ user-select:none
+}
+span.citneed {
+ vertical-align:top;
+ font-size:.7em;
+ padding-left:.3em
+}
+small {
+ font-size:.4em
+}
+p.st {
+ margin-top:-1em
+}
+div.fancyPositioning div.picture-left {
+ float:left;
+ width:40%;
+ overflow:hidden;
+ margin-right:1em
+}
+div.fancyPositioning div.picture-left img {
+ width:100%
+}
+div.fancyPositioning div.picture-left p.caption {
+ font-size:.7em
+}
+div.fancyPositioning div.tleft {
+ float:left;
+ width:55%
+}
+div.fancyPositioning div.tleft p:first-child {
+ margin-top:0
+}
+div.fancyPositioning:after {
+ display:block;
+ content:"";
+ clear:both
+}
+ul li img {
+ height:1em
+}
+blockquote {
+ color:#456;
+ margin-left:0;
+ margin-top:2em;
+ margin-bottom:2em
+}
+blockquote span {
+ float:left;
+ margin-left:1rem;
+ padding-top:1rem
+}
+blockquote author {
+ display:block;
+ clear:both;
+ font-size:.6em;
+ margin-left:2.4rem;
+ font-style:oblique
+}
+blockquote author:before {
+ content:"- ";
+ margin-right:1em
+}
+blockquote:before {
+ font-family:Times New Roman,Times,Arial;
+ color:#666;
+ content:open-quote;
+ font-size:2.2em;
+ font-weight:600;
+ float:left;
+ margin-top:0;
+ margin-right:.2rem;
+ width:1.2rem
+}
+blockquote:after {
+ content:"";
+ display:block;
+ clear:both
+}
+span.visited {
+ color:#941352
+}
+span.visited-maroon {
+ color:#85144b
+}
+
+charcell {
+    width: 9px;
+    height: 15px;
+    margin: 0;
+    padding: 0;
+    display: inline-block;
+    line-height: 9px;
+    background-repeat: no-repeat;
+    background-image: url("hp2640.png");
+    background-blend-mode: screen;
+}
+
+charcursor {
+    float: left;
+    width: 9px;
+    height: 15px;
+    margin: 0;
+    padding: 0;
+    display: inline-block;
+    line-height: 9px;
+    background-repeat: no-repeat;
+    background-image: url("hp2640.png");
+    background-blend-mode: screen;
+    background-position: -135px -225px;
+}
+
+.blink {
+    animation: blink-animation 1s infinite;
+    -webkit-animation: blink-animation 1s infinite;
+}
+@keyframes blink-animation {
+    0% {opacity: 0;}
+    15% {opacity: 1;}
+    50% {opacity: 1;}
+    65% {opacity: 0;}
+    100% {opacity: 0;}
+}
+@-webkit-keyframes blink-animation blink-animation {
+    0% {opacity: 0;}
+    15% {opacity: 1;}
+    50% {opacity: 1;}
+    65% {opacity: 0;}
+    100% {opacity: 0;}
+}
+
+#console {
+    width: 720px;
+    height: 480px;
+    background: url("crt_grad.png") no-repeat;
+    background-size: 100% 100%;
+    line-height: 9px;
+    box-shadow: 0px 0px 16px rgba(0, 0, 0, 0.5);
+    margin: 16px 0px;
+    padding: 50px 66px;
+    border-radius: 16px;
+}
+
+console {
+    display: block;
+}
+
+
+header {
+    display: block;
+}
+
+controlpanel {
+    display: block;
+    margin-bottom: 10px;
+}
+
+message {
+    display: block;
+}
+
+github {
+    display: block;
+}
