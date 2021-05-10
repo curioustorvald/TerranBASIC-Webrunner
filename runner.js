@@ -43,7 +43,6 @@ let con = {
 }
 Object.freeze(con)
 
-
 function createNewTerminal() {
     return {
         textbuffer: Array.from({ length: TEXT_ROWS }, () => Array.from({ length: TEXT_COLS }, () => 250)),
@@ -82,7 +81,13 @@ function createNewTerminal() {
             this.cursorY = newy
         },
         scrollUp: function(size) {
-            // TODO
+            if (size < 0) throw Error(`Scroll size is lesser than zero (${size})`)
+            for (let yoff = 0; yoff < TEXT_ROWS - size; yoff++) {
+                textbuffer[yoff] = textbuffer[yoff + size]
+            }
+            for (let yoff = TEXT_ROWS - size; yoff < TEXT_ROWS; yoff++) {
+                textbuffer[yoff] = Array.from({ length: TEXT_COLS }, () => 0)
+            }
         },
         print: function(string) {
             // TODO
@@ -116,7 +121,7 @@ function pageinit() {
 function repaint() {
     let out = ``;
     for (let y = 0; y < TEXT_ROWS; y++) {
-        if (y > 0) out += `<br />`
+        if (y > 0) out += `<br>`
         for (let x = 0; x < TEXT_COLS; x++) {
             if (terminal.showcursor && x == terminal.cursorX && y == terminal.cursorY)
                 out += `<charcursor></charcursor>`
