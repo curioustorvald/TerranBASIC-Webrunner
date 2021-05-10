@@ -13,8 +13,8 @@
     </header>
     <controlpanel>
         <div>
-            <button id="button_stop">Stop</button>
-            <button id="button_reset">Reset</button>
+            <button id="button_stop" onclick="terminate()">Stop</button>
+            <button id="button_reset" onclick="reset()">Reset</button>
             <button id="button_loadfile">Load&hellip;</button>
             <button id="button_savefile">Save&hellip;</button>
         </div>
@@ -32,7 +32,7 @@
     
     </github>
     <script>
-        document.addEventListener('keydown', appendtext)
+        document.addEventListener('keydown', eventKeyDown)
     </script>
 </body>
 </html>
