@@ -52,6 +52,9 @@ function createNewTerminal() {
         cursorX: 0,
         showcursor: true,
         
+        ttyEscState: "INITIAL",
+        ttyEscArguments: [],
+        
         cls: function() {
             this.textbuffer = Array.from({ length: TEXT_ROWS }, () => Array.from({ length: TEXT_COLS }, () => 0))
         },
@@ -89,9 +92,199 @@ function createNewTerminal() {
                 textbuffer[yoff] = Array.from({ length: TEXT_COLS }, () => 0)
             }
         },
-        print: function(string) {
-            // TODO
+        writeout: function(char) {
+            let printable = acceptChar(char) // this function processes the escape codes and CRLFs
+
+            if (printable) {
+                putChar(this.cursorX, this.cursorY, char)
+                setCursorPos(this.cursorX + 1, this.cursorY) // should automatically wrap and advance a line for out-of-bound x-value
+            }
         },
+        putChar: function(x, y, text, foreColour, backColour) {
+            this.textbuffer[y][x] = text
+        },
+        acceptChar: function(char) {
+            let reject = function() {
+                this.ttyEscState = "INITIAL"
+                this.ttyEscArguments.clear()
+                return true
+            }
+            let accept = function(execute) {
+                this.ttyEscState = "INITIAL"
+                execute()
+                this.ttyEscArguments.clear()
+                return false
+            }
+            let registerNewNumberArg = function(newnum, newState) {
+                this.ttyEscArguments.push((char|0) - 0x30)
+                this.ttyEscState = newState
+            }
+            let appendToExistingNumber = function(newnum) {
+                this.ttyEscArguments.push(this.ttyEscArguments.pop() * 10 + ((newnum|0) - 0x30))
+            }
+
+            //println("[tty] accepting char $char, state: $ttyEscState")
+
+            switch (this.ttyEscState) {
+                case "INITIAL": {
+                    switch (char) {
+                        case ESC: this.ttyEscState = "ESC"; break
+                        case LF: crlf(); break
+                        case BS: backspace(); break
+                        case TAB: insertTab(); break
+                        case BEL: ringBell(); break
+                        case 0: case 1: case 2: case 3: case 4: case 5: case 6: case 7: 
+                        case 8: case 9: case 10: case 11: case 12: case 13: case 14: case 15:
+                        case 16: case 17: case 18: case 19: case 20: case 21: case 22: case 23:
+                        case 24: case 25: case 26: case 27: case 28: case 29: case 30: case 31: return false
+                        default: return true
+                    }
+                    break
+                }
+                case "ESC": {
+                    switch (''+char) {
+                        case 'c': return accept(()=>{ resetTtyStatus() })
+                        case '[': this.ttyEscState = "CSI"; break
+                        default: return reject()
+                    }
+                    break
+                }
+                case "CSI": {
+                    switch (''+char) {
+                        case 'A': return accept(()=>{ cursorUp() })
+                        case 'B': return accept(()=>{ cursorDown() })
+                        case 'C': return accept(()=>{ cursorFwd() })
+                        case 'D': return accept(()=>{ cursorBack() })
+                        case 'E': return accept(()=>{ cursorNextLine() })
+                        case 'F': return accept(()=>{ cursorPrevLine() })
+                        case 'G': return accept(()=>{ cursorX() })
+                        case 'J': return accept(()=>{ eraseInDisp() })
+                        case 'K': return accept(()=>{ eraseInLine() })
+                        case 'S': return accept(()=>{ scrollUp() })
+                        case 'T': return accept(()=>{ scrollDown() })
+                        case 'm': return accept(()=>{ sgrOneArg() })
+                        case '?': this.ttyEscState = "PRIVATESEQ"; break
+                        case ';': {
+                            this.ttyEscArguments.push(0)
+                            this.ttyEscState = "SEP1"
+                            break
+                        }
+                        case '0': case '1': case '2': case '3': case '4':
+                        case '5': case '6': case '7': case '8': case '9': registerNewNumberArg(char, "NUM1"); break
+                        default: return reject()
+                    }
+                    break
+                }
+                case "PRIVATESEQ": {
+                    switch (''+char) {
+                        case '0': case '1': case '2': case '3': case '4':
+                        case '5': case '6': case '7': case '8': case '9': registerNewNumberArg(char, "PRIVATENUM"); break
+                        default: return reject()
+                    }
+                    break
+                }
+                case "PRIVATENUM": {
+                    switch (''+char) {
+                        case 'h': return accept(()=>{ privateSeqH(this.ttyEscArguments.pop()) })
+                        case 'l': return accept(()=>{ privateSeqL(this.ttyEscArguments.pop()) })
+                        case '0': case '1': case '2': case '3': case '4':
+                        case '5': case '6': case '7': case '8': case '9': appendToExistingNumber(char); break
+                        default: return reject()
+                    }
+                    break
+                }
+                case "NUM1": {
+                    switch (''+char) {
+                        case 'A': return accept(()=>{ cursorUp(this.ttyEscArguments.pop()) })
+                        case 'B': return accept(()=>{ cursorDown(this.ttyEscArguments.pop()) })
+                        case 'C': return accept(()=>{ cursorFwd(this.ttyEscArguments.pop()) })
+                        case 'D': return accept(()=>{ cursorBack(this.ttyEscArguments.pop()) })
+                        case 'E': return accept(()=>{ cursorNextLine(this.ttyEscArguments.pop()) })
+                        case 'F': return accept(()=>{ cursorPrevLine(this.ttyEscArguments.pop()) })
+                        case 'G': return accept(()=>{ cursorX(ttyEscArguments.pop()) })
+                        case 'J': return accept(()=>{ eraseInDisp(this.ttyEscArguments.pop()) })
+                        case 'K': return accept(()=>{ eraseInLine(this.ttyEscArguments.pop()) })
+                        case 'S': return accept(()=>{ scrollUp(this.ttyEscArguments.pop()) })
+                        case 'T': return accept(()=>{ scrollDown(this.ttyEscArguments.pop()) })
+                        case 'm': return accept(()=>{ sgrOneArg(this.ttyEscArguments.pop()) })
+                        case ';': this.ttyEscState = "SEP1"; break
+                        case '0': case '1': case '2': case '3': case '4':
+                        case '5': case '6': case '7': case '8': case '9': appendToExistingNumber(char); break;
+                        default: return reject()
+                    }
+                    break
+                }
+                case "NUM2": {
+                    switch (''+char) {
+                        case '0': case '1': case '2': case '3': case '4':
+                        case '5': case '6': case '7': case '8': case '9': appendToExistingNumber(char); break
+                        case 'H': return accept(()=>{
+                            let arg2 = this.ttyEscArguments.pop()
+                            let arg1 = this.ttyEscArguments.pop()
+                            cursorXY(arg1, arg2)
+                        })
+                        case 'm': return accept(()=>{
+                            let arg2 = this.ttyEscArguments.pop()
+                            let arg1 = this.ttyEscArguments.pop()
+                            sgrTwoArg(arg1, arg2)
+                        })
+                        case ';': this.ttyEscState = "SEP2"; break
+                        default: return reject()
+                    }
+                    break
+                }
+                case "NUM3": {
+                    switch (''+char) {
+                        case '0': case '1': case '2': case '3': case '4':
+                        case '5': case '6': case '7': case '8': case '9': appendToExistingNumber(char); break
+                        case 'm': return accept(()=>{
+                            let arg3 = this.ttyEscArguments.pop()
+                            let arg2 = this.ttyEscArguments.pop()
+                            let arg1 = this.ttyEscArguments.pop()
+                            sgrThreeArg(arg1, arg2, arg3)
+                        })
+                        default: return reject()
+                    }
+                    break
+                }
+                case "SEP1": {
+                    switch (''+char) {
+                        case '0': case '1': case '2': case '3': case '4':
+                        case '5': case '6': case '7': case '8': case '9': registerNewNumberArg(char, "NUM2"); break
+                        case 'H': return accept(()=>{
+                            let arg1 = this.ttyEscArguments.pop()
+                            cursorXY(arg1, 0)
+                        })
+                        case 'm': return accept(()=>{
+                            let arg1 = this.ttyEscArguments.pop()
+                            sgrTwoArg(arg1, 0)
+                        })
+                        case ';': {
+                            this.ttyEscArguments.push(0)
+                            this.ttyEscState = "SEP2"
+                            break
+                        }
+                        default: return reject()
+                    }
+                    break
+                }
+                case "SEP2": {
+                    switch (''+char) {
+                        case 'm': return accept(()=>{
+                            let arg2 = this.ttyEscArguments.pop()
+                            let arg1 = this.ttyEscArguments.pop()
+                            sgrThreeArg(arg1, arg2, 0)
+                        })
+                        case '0': case '1': case '2': case '3': case '4':
+                        case '5': case '6': case '7': case '8': case '9': registerNewNumberArg(char, "NUM3"); break
+                        default: return reject()
+                    }
+                    break
+                }
+            }
+
+            return false
+        }
     }
 }
 
