@@ -13,6 +13,8 @@ const BS = 0x08
 const BEL = 0x07
 const ESC = 0x1B
 
+let stdReading = false
+let stdReadbuf = ''
 let terminateRequested = false
 let terminal = undefined
 
@@ -25,11 +27,40 @@ let graphics = {
 }
 Object.freeze(graphics)
 
+async function stdReadImpl() {
+    return new Promise((resolve) => {
+        let stop = false
+        document.getElementById("console_fake_enter_button").onchange = function(e) {
+            console.log(e)
+            if (e.target.checked == true) stop = true
+        }
+        document.getElementById("console_fake_enter_button").onchange2 = function(e) {
+            console.log(e)
+            if (e.checked == true) stop = true
+        }
+        
+        loop()
+        
+        function loop() {
+            if (stop == true) {
+                resolve()
+                stdReading = false
+                document.getElementById("console_fake_enter_button").checked = false
+            }
+            setTimeout(loop, 100)
+        }
+    })
+}
+
 let sys = {
     poke: function(memaddr, byte) {},
     peek: function(memaddr) {},
-    read: function() {
-        // TODO
+    read: async function(callback) {
+        console.log("sys.read")
+        stdReadbuf = ''
+        stdReading = true
+        await stdReadImpl()
+        callback(stdReadbuf)
     }
 }
 Object.freeze(sys)
@@ -51,6 +82,21 @@ let con = {
 }
 Object.freeze(con)
 
+function println(string) {
+    if (string === undefined)
+        print('\n', 1)
+    else
+        print(string + '\n', 1)
+    repaint()
+}
+
+function print(string, norepaint) {
+    for (let k = 0; k < string.length; k++) {
+        terminal.writeOut(string.charCodeAt(k))
+    }
+    if (!norepaint) repaint()
+}
+
 function createNewTerminal() {
     return {
         textbuffer: Array.from({ length: TEXT_ROWS }, () => Array.from({ length: TEXT_COLS }, () => 250)),
@@ -65,8 +111,8 @@ function createNewTerminal() {
         
         cls: function() {
             this.textbuffer = Array.from({ length: TEXT_ROWS }, () => Array.from({ length: TEXT_COLS }, () => 0))
+            repaint()
         },
-        println: function(string) { print(string + '\n') },
         setCursorPos: function(x, y) {
             let newx = x
             let newy = y
@@ -100,7 +146,7 @@ function createNewTerminal() {
                 textbuffer[yoff] = Array.from({ length: TEXT_COLS }, () => 0)
             }
         },
-        writeout: function(char) {
+        writeOut: function(char) {
             let printable = this.acceptChar(char) // this function processes the escape codes and CRLFs
 
             if (printable) {
@@ -313,18 +359,54 @@ function terminate() {
 }
 
 function reset() {
+    document.getElementById("console_fake_enter_button").checked = false
+    
     terminal = createNewTerminal()
     terminal.cls()
-    "Terran BASIC Web Runtime version 0.1\nTerran BASIC version 1.2\nOk\n".split('').forEach(c=>terminal.writeout(c.charCodeAt(0)))
-    repaint()
+    println("Terran BASIC Web Runtime version 0.1")
+    println("Terran BASIC Version 1.2")
+    println("Ok")
+
+    console.log("RESET hit")
+    
+    sys.read((s) => {
+        console.log(s)
+        println(`You entered: ${stdReadbuf}`)
+        
+        sys.read((s) => {
+            console.log(s)
+            println(`You entered: ${stdReadbuf}`)
+        })
+    })
+    
 }
 
-function eventKeyDown(e) {
-    console.log(e)
-    if (e.key.length == 1) {
-        //terminal.print(e.key.charCodeAt(0))
-        //terminal.cursorRight()
-        repaint()
+function keyEventToKeycode(e) {
+    if (e.key.length == 1) return e.key.charCodeAt(0)
+    switch (e.key) {
+        case "ArrowUp": return 200
+        case "ArrowLeft": return 203
+        case "ArrowRight": return 205
+        case "ArrowDown": return 208
+        case "Backspace": return 8
+        case "Tab": return 9
+        case "Enter": return 13
+    }
+}
+
+function eventKeyDown(e) {    
+    if (stdReading) {
+        let keycode = keyEventToKeycode(e)
+        if (keycode == 13) {
+            let btn = document.getElementById("console_fake_enter_button")
+            btn.checked = true
+            btn.onchange2(btn)
+            println()
+        }
+        else if (keycode > 0) {
+            stdReadbuf += String.fromCharCode(keycode)
+            print(String.fromCharCode(keycode))
+        }
     }
 }
 
