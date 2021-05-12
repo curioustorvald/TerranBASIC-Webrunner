@@ -27,6 +27,29 @@ let graphics = {
 }
 Object.freeze(graphics)
 
+async function startAppLoop() {
+    terminateRequested = false
+    await appLoop(_ => {
+        //terminal.setCursorPos(1,3)
+        println(Date.now())
+    })
+}
+
+async function appLoop(call) {
+    return new Promise((resolve) => {
+        loop()
+        
+        function loop() {
+            if (!terminateRequested) {
+                call()
+                setTimeout(loop, 20)
+            }
+        }
+        
+        resolve()
+    })
+}
+
 async function stdReadImpl() {
     return new Promise((resolve) => {
         let stop = false
@@ -43,9 +66,9 @@ async function stdReadImpl() {
         
         function loop() {
             if (stop == true) {
-                resolve()
                 stdReading = false
                 document.getElementById("console_fake_enter_button").checked = false
+                resolve()
             }
             setTimeout(loop, 100)
         }
@@ -140,10 +163,10 @@ function createNewTerminal() {
         scrollUp: function(size) {
             if (size < 0) throw Error(`Scroll size is lesser than zero (${size})`)
             for (let yoff = 0; yoff < TEXT_ROWS - size; yoff++) {
-                textbuffer[yoff] = textbuffer[yoff + size]
+                this.textbuffer[yoff] = this.textbuffer[yoff + size]
             }
             for (let yoff = TEXT_ROWS - size; yoff < TEXT_ROWS; yoff++) {
-                textbuffer[yoff] = Array.from({ length: TEXT_COLS }, () => 0)
+                this.textbuffer[yoff] = Array.from({ length: TEXT_COLS }, () => 0)
             }
         },
         writeOut: function(char) {
@@ -359,6 +382,8 @@ function terminate() {
 }
 
 function reset() {
+    terminateRequested = true
+    
     document.getElementById("console_fake_enter_button").checked = false
     
     terminal = createNewTerminal()
@@ -369,16 +394,7 @@ function reset() {
 
     console.log("RESET hit")
     
-    sys.read((s) => {
-        console.log(s)
-        println(`You entered: ${stdReadbuf}`)
-        
-        sys.read((s) => {
-            console.log(s)
-            println(`You entered: ${stdReadbuf}`)
-        })
-    })
-    
+    startAppLoop()
 }
 
 function keyEventToKeycode(e) {
