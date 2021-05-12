@@ -4,6 +4,14 @@ const TEXT_ROWS = 32
 const TEXT_COLS = 80
 const CW = 9
 const CH = 15
+const TAB_SIZE = 8
+
+const CR = 0x0D
+const LF = 0x0A
+const TAB = 0x09
+const BS = 0x08
+const BEL = 0x07
+const ESC = 0x1B
 
 let terminateRequested = false
 let terminal = undefined
@@ -93,17 +101,29 @@ function createNewTerminal() {
             }
         },
         writeout: function(char) {
-            let printable = acceptChar(char) // this function processes the escape codes and CRLFs
+            let printable = this.acceptChar(char) // this function processes the escape codes and CRLFs
 
             if (printable) {
-                putChar(this.cursorX, this.cursorY, char)
-                setCursorPos(this.cursorX + 1, this.cursorY) // should automatically wrap and advance a line for out-of-bound x-value
+                this.putChar(this.cursorX, this.cursorY, char)
+                this.setCursorPos(this.cursorX + 1, this.cursorY) // should automatically wrap and advance a line for out-of-bound x-value
             }
         },
         putChar: function(x, y, text, foreColour, backColour) {
             this.textbuffer[y][x] = text
         },
-        acceptChar: function(char) {
+        insertTab: function() {
+            this.setCursorPos((this.cursorX / TAB_SIZE + 1) * TAB_SIZE, this.cursorY)
+        },
+        crlf: function() {
+            let newy = this.cursorY + 1
+            this.setCursorPos(0, (newy >= TEXT_ROWS) ? TEXT_ROWS - 1 : newy)
+            if (newy >= TEXT_ROWS) this.scrollUp(1)
+        },
+        backspace: function() {
+            setCursorPos(this.cursorX - 1, this.cursorY)
+            putChar(this.cursorX - 1, this.cursorY, 0x20)
+        },
+        acceptChar: function(char) { // char: Int
             let reject = function() {
                 this.ttyEscState = "INITIAL"
                 this.ttyEscArguments.clear()
@@ -129,9 +149,9 @@ function createNewTerminal() {
                 case "INITIAL": {
                     switch (char) {
                         case ESC: this.ttyEscState = "ESC"; break
-                        case LF: crlf(); break
-                        case BS: backspace(); break
-                        case TAB: insertTab(); break
+                        case LF: this.crlf(); break
+                        case BS: this.backspace(); break
+                        case TAB: this.insertTab(); break
                         case BEL: ringBell(); break
                         case 0: case 1: case 2: case 3: case 4: case 5: case 6: case 7: 
                         case 8: case 9: case 10: case 11: case 12: case 13: case 14: case 15:
@@ -295,6 +315,7 @@ function terminate() {
 function reset() {
     terminal = createNewTerminal()
     terminal.cls()
+    "Terran BASIC Web Runtime version 0.1\nTerran BASIC version 1.2\nOk\n".split('').forEach(c=>terminal.writeout(c.charCodeAt(0)))
     repaint()
 }
 

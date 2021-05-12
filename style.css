@@ -10,7 +10,6 @@ body {
  padding:1em;
  line-height:1.4;
  text-align:justify;
- z-index: 10;
 }
 html.contrast body {
  color:#050505
@@ -192,8 +191,7 @@ charcell {
     height: 15px;
     margin: 0;
     padding: 0;
-    display: block;
-    float: left;
+    display: inline-block;
     background-repeat: no-repeat;
     background-image: url("hp2640.png");
     background-blend-mode: screen;
@@ -204,8 +202,7 @@ charcursor {
     height: 15px;
     margin: 0 -9px 0 0;
     padding: 0;
-    display: block;
-    float: left;
+    display: inline-block;
     background-repeat: no-repeat;
     background-image: url("hp2640.png");
     background-blend-mode: screen;
