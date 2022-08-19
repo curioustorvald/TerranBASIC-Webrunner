@@ -29,23 +29,16 @@ Object.freeze(graphics)
 
 async function startAppLoop() {
     terminateRequested = false
-    await appLoop(_ => {
-        //terminal.setCursorPos(1,3)
-        println(Date.now())
+    await appRun(_ => {
+        bF.bulkLoadText(document.getElementById("programinput").value)
+        bF.run()
+        console.log("Execution complete")
     })
 }
 
-async function appLoop(call) {
+async function appRun(call) {
     return new Promise((resolve) => {
-        loop()
-        
-        function loop() {
-            if (!terminateRequested) {
-                call()
-                setTimeout(loop, 20)
-            }
-        }
-        
+        call()
         resolve()
     })
 }
@@ -393,7 +386,11 @@ function reset() {
     println("Ok")
 
     console.log("RESET hit")
-    
+
+    bF.new(true)
+}
+
+function start() {
     startAppLoop()
 }
 
@@ -431,6 +428,7 @@ function pageinit() {
 }
 
 function repaint() {
+//     console.log("Repaint!")
     let out = ``;
     for (let y = 0; y < TEXT_ROWS; y++) {
         if (y > 0) out += `<br>`

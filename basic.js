@@ -25,12 +25,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
  */
 
-if (exec_args !== undefined && exec_args[1] !== undefined && exec_args[1].startsWith("-?")) {
-    println("Usage: basic <optional path to basic program>")
-    println("When the optional basic program is set, the interpreter will run the program and then quit if successful, remain open if the program had an error.")
-    return 0
-}
-
 const THEVERSION = "1.2"
 
 const PROD = true
@@ -41,12 +35,7 @@ let DATA_CURSOR = 0
 let DATA_CONSTS = []
 const BASIC_HOME_PATH = "/home/basic/"
 
-if (system.maxmem() < 8192) {
-    println("Out of memory. BASIC requires 8K or more User RAM")
-    throw Error("Out of memory")
-}
-
-let vmemsize = system.maxmem()
+let vmemsize = 65536
 
 let cmdbuf = [] // index: line number
 let gotoLabels = {}
@@ -78,14 +67,14 @@ function cloneObject(o) { return JSON.parse(JSON.stringify(o)) }
 class ParserError extends Error {
     constructor(...args) {
         super(...args)
-        Error.captureStackTrace(this, ParserError)
+//         Error.captureStackTrace(this, ParserError)
     }
 }
 
 class BASICerror extends Error {
     constructor(...args) {
         super(...args)
-        Error.captureStackTrace(this, ParserError)
+//         Error.captureStackTrace(this, ParserError)
     }
 }
 
@@ -235,7 +224,7 @@ const greetText = (termWidth >= 70) ? `Terran BASIC ${THEVERSION}  `+String.from
 const greetLeftPad = (termWidth - greetText.length - 6) >> 1
 const greetRightPad = termWidth - greetLeftPad - greetText.length - 6
 
-con.clear()
+/*con.clear()
 con.color_pair(253,255)
 print('  ');con.addch(17)
 con.color_pair(0,253)
@@ -246,7 +235,7 @@ con.addch(16);con.curs_right();print('  ')
 con.move(3,1)
 
 con.color_pair(253,255)
-println(prompt)
+println(prompt)*/
 
 // variable object constructor
 /** variable object constructor
@@ -4215,9 +4204,8 @@ bF.catalog = function(args) { // CATALOG function
     com.sendMessage(port, "LIST")
     println(com.pullMessage(port))
 }
-Object.freeze(bF)
 
-if (exec_args !== undefined && exec_args[1] !== undefined) {
+/*if (exec_args !== undefined && exec_args[1] !== undefined) {
     bF.load(["load", exec_args[1]])
     try {
         bF.run()
@@ -4257,6 +4245,15 @@ while (!tbasexit) {
 
         println(prompt)
     }
-}
+}*/
 
-0
+bF.bulkLoadText = function(prg) { // LOAD function
+    // read the source
+    prg.split('\n').forEach((line) => {
+        var i = line.indexOf(" ")
+        var lnum = line.slice(0, i)
+        if (isNaN(lnum)) throw lang.illegalType()
+        cmdbuf[lnum] = line.slice(i + 1, line.length)
+    })
+}
+Object.freeze(bF)

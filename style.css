@@ -6,10 +6,10 @@ body {
  color:#454545;
  font-size:16px;
  margin:2em auto;
- max-width:852px;
  padding:1em;
  line-height:1.4;
  text-align:justify;
+ max-width: 1536px;
 }
 html.contrast body {
  color:#050505
@@ -238,12 +238,23 @@ charcursor {
     line-height: 9px;
     box-shadow: 0px 0px 16px rgba(0, 0, 0, 0.5);
     margin: 16px 0px;
-    padding: 50px 66px;
+    padding: 25px 33px;
     border-radius: 16px;
 }
 
+#gridcontainer {
+    display:grid;
+    grid-gap:24px;
+    align-items: center;
+}
+
 console {
-    display: block;
+    width: 786px;
+    display: inline-block;
+}
+
+#gridcontainer {
+    grid-template-columns: 786px auto;
 }
 
 
@@ -252,7 +263,7 @@ header {
 }
 
 controlpanel {
-    display: block;
+    display: inline-block;
     margin-bottom: 10px;
 }
 
@@ -262,4 +273,31 @@ message {
 
 github {
     display: block;
+}
+
+gridpane {
+    display: block;
+    height: 100%;
+}
+
+#consolepane {
+    text-align: center;
+}
+
+#programinput {
+    width: 100%;
+    height: calc(100% - 48px);
+    min-height: 16rem;
+}
+#proginputlabel {
+    display: table-cell;
+    height: 48px;
+    padding: 0 1em;
+    vertical-align: middle;
+}
+
+@media (max-width: 1024px) {
+    #gridcontainer {
+        grid-template-columns: auto;
+    }
 }

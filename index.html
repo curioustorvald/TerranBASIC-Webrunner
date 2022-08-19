@@ -6,25 +6,37 @@
     <link rel="stylesheet" type="text/css" href="style.css">
     <title>Terran BASIC</title>
     <script src="runner.js"></script>
+    <script src="basic.js"></script>
 </head>
 <body onload="pageinit();">
     <header>
-        <h2>Terran BASIC Web Runtime</h2>
+        <h2 style="text-align:center">Terran BASIC Web Runtime</h2>
     </header>
-    <controlpanel>
-        <div>
-            <button id="button_stop" onclick="terminate()">Stop</button>
-            <button id="button_reset" onclick="reset()">Reset</button>
-            <button id="button_loadfile">Load&hellip;</button>
-            <button id="button_savefile">Save&hellip;</button>
-        </div>
-    </controlpanel>
-    <console>
-        <div id="console"></div>
-        <input type="checkbox" id="console_fake_enter_button" style="display:none">
-    </console>
+    <div id="gridcontainer" style="display:grid">
+        <gridpane id="consolepane">
+            <console>
+                <div id="console"></div>
+                <input type="checkbox" id="console_fake_enter_button" style="display:none">
+            </console>
+            <controlpanel>
+                <div>
+                    <button id="button_run" onclick="start()">Run</button>
+                    <button id="button_stop" onclick="terminate()">Stop</button>
+                    <button id="button_reset" onclick="reset()">Reset</button>
+                    <button id="button_loadfile">Load&hellip;</button>
+                    <button id="button_savefile">Save&hellip;</button>
+                </div>
+            </controlpanel>
+        </gridpane>
+        <gridpane>
+            <h4 id="proginputlabel">Program Input</h4>
+            <div><textarea id="programinput"></textarea></div>
+        </gridpane>
+    </div>
     <hr />
-    <message>
+    <message style="line-height: 1.1;">
+        <p>Enter the program, hit Run, then wait a while &mdash; seriously, it takes a long time to even have a text displayed on the console!
+        <p>The INPUT command does not work&hellip; yet!</p>
         <p>Confused? Take a look at the <a href="https://raw.githubusercontent.com/curioustorvald/TerranBASIC/master/tbasman.pdf" target="_blank" rel="noopener noreferrer">mighty fine manual!</a></p>
     </message>
     <github>
@@ -32,6 +44,7 @@
     </github>
     <script>
         document.addEventListener('keydown', eventKeyDown)
+        var serial = {println:console.log, printerr:console.log}
     </script>
 </body>
 </html>
